@@ -48,15 +48,15 @@ public class Miner {
 		  String nonce = data.substring(152,160);
 		   
 		  //This chunk creates endian switched byte arrays from the data
-		   byte[] versionbit = endianSwitch(Converter.fromHexString(version));
-		   byte[] prevhashbit = endianSwitch(Converter.fromHexString(prevhash));
-		   byte[] merklebit = endianSwitch(Converter.fromHexString(merkle));
-		   byte[] timestampbit = endianSwitch(Converter.fromHexString(timestamp));
-		   byte[] bitsbit = endianSwitch(Converter.fromHexString(bits));
-		   byte[] noncebit = endianSwitch(Converter.fromHexString(nonce));
+		   byte[] versionbit = myEndianSwitch(Converter.fromHexString(version));
+		   byte[] prevhashbit = myEndianSwitch(Converter.fromHexString(prevhash));
+		   byte[] merklebit = myEndianSwitch(Converter.fromHexString(merkle));
+		   byte[] timestampbit = myEndianSwitch(Converter.fromHexString(timestamp));
+		   byte[] bitsbit = myEndianSwitch(Converter.fromHexString(bits));
+		   byte[] noncebit = myEndianSwitch(Converter.fromHexString(nonce));
 		   
 	       //This chunk of code reassembles the data into a single byre array      
-		   byte[] databyte = Converter.fromHexString(data);
+		   byte[] databyte = new byte[80];
 		   System.arraycopy(versionbit, 0, databyte, 0, versionbit.length);
 		   System.arraycopy(prevhashbit, 0, databyte, 4, prevhashbit.length);
 		   System.arraycopy(merklebit, 0, databyte, 36, merklebit.length);
@@ -67,6 +67,8 @@ public class Miner {
 		   //Converts the target string to a byte array for easier comparison
 		   byte[] targetbyte = Converter.fromHexString(target);
 		   targetbyte = endianSwitch(targetbyte);
+
+		   System.out.println(myPrintByteArray(databyte));
 		   
 		   byte[] scrypted = doScrypt(databyte, targetbyte);//Calls sCrypt with the proper parameters, and returns the correct data
 		   
@@ -116,12 +118,25 @@ public class Miner {
 	}
 	
 	
+	public static String myPrintByteArray(byte[] bites){
+		//Method to convert a byte array to hex literal
+		String str = "";
+		int n = 0;
+		for(byte bite:bites){
+			n += 1;
+			str = str + (Integer.toString( ( bite & 0xff ) + 0x100, 16 /* radix */ ).substring( 1 )) + " ";
+			if((n%16) == 0) { str += "\n"; }
+			else if((n%4) == 0) { str += " "; }
+		}
+		return str;
+	}
+
 	public static String printByteArray(byte[] bites){
 		//Method to convert a byte array to hex literal
 		String str = "";
-		for(byte bite:bites){ 
+		for(byte bite:bites){
 			str = str + (Integer.toString( ( bite & 0xff ) + 0x100, 16 /* radix */ ).substring( 1 ));
-			}
+		}
 		return str;
 	}
 	
@@ -132,7 +147,19 @@ public class Miner {
 		   bytes2[i] = bytes[bytes.length-i-1];
 	   }
 	   return bytes2;
-}
+	}
+
+	public static byte[] myEndianSwitch(byte[] bytes) {
+		//Method to switch the endianess of a byte array
+	   byte[] bytes2 = new byte[bytes.length];
+	   for(int i = 0; i < bytes.length;  i+=4){
+		   bytes2[i] = bytes[i+3];
+		   bytes2[i+1] = bytes[i+2];
+		   bytes2[i+2] = bytes[i+1];
+		   bytes2[i+3] = bytes[i];
+	   }
+	   return bytes2;
+	}
 
 
 	public static Work getwork() throws IOException{
