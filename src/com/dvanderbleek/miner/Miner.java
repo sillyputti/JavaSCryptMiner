@@ -73,8 +73,8 @@ public class Miner {
 			
 			if (scrypted[31] == 0) {
 				cc = 30;
-				while((cc>=0) && (scrypted[cc] == 0)) cc -= 1;
-				if((cc>0) && (((0x100+scrypted[cc])&0xff) < ((0x100+target[cc])&0xff))) {
+				while((cc>0) && (scrypted[cc] == target[cc])) cc -= 1;
+				if(((0x100+scrypted[cc])&0xff) < ((0x100+target[cc])&0xff)) {
 					System.out.println(printByteArray(scrypted));
 					return true;
 				}
